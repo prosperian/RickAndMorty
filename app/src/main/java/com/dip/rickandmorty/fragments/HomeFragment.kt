@@ -51,17 +51,16 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         viewModel.newCharacters.observe(viewLifecycleOwner) {
             when (it) {
                 is Resource.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    if (!it?.data?.results.isNullOrEmpty()) {
-                        addNextPage(it?.data?.results!!)
+                    adapter.hideLoading()
+                    if (!it.data?.results.isNullOrEmpty()) {
+                        addNextPage(it.data?.results!!)
                     }
                 }
                 is Resource.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
+                    adapter.showLoading()
                 }
                 is Resource.Error -> {
-                    binding.progressBar.visibility = View.GONE
-                    Log.d("HomeFragment", "error loading")
+                    adapter.hideLoading()
                 }
             }
 
@@ -80,7 +79,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }
                 is Resource.Error -> {
                     binding.progressBar.visibility = View.GONE
-                    Log.d("HomeFragment", "error loading")
                 }
             }
 
@@ -120,10 +118,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         rvHomeCharacters.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (!recyclerView.canScrollVertically(RecyclerView.FOCUS_DOWN)) {
+                if (!recyclerView.canScrollVertically(RecyclerView.FOCUS_DOWN) && !adapter.isLoading()) {
                     viewModel.loadNextPage()
                 }
-
             }
         })
 
